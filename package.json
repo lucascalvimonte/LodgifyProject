@@ -1,0 +1,20 @@
+{
+  "name": "lodgifyproject",
+  "version": "1.0.0",
+  "description": "This project was developed for the QA Automation assessment at Lodgify. It includes automated tests using Cypress to validate \"ClickUp\" functionalities, such as creating spaces and tasks via the API and web application. The focus is on building a scalable and maintainable test framework with best automation practices.",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "cy:open": "cypress open"
+  },
+  "keywords": [
+    "Lodgify",
+    "Cypress",
+    "Project"
+  ],
+  "author": "lucascalvimonte",
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "^13.14.2"
+  }
+}
