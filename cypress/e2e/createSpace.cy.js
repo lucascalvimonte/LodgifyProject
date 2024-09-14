@@ -29,4 +29,10 @@ describe('Create and Manage Spaces via ClickUp API', () => {
         cy.contains(spaceName, { timeout: 30000 }).should('exist')
     })
 
+    it('should create a new task in the test space', () => {
+        // Verify that the space has been created in the UI
+        cy.get(`[data-test="project-row__name__${spaceName}"]`).click()
+    })
+
+
 })
