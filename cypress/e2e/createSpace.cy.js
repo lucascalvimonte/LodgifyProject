@@ -29,4 +29,7 @@ describe('Create and Manage Spaces via ClickUp API', () => {
         cy.contains(spaceName, { timeout: 30000 }).should('exist')
     })
 
+    it('should create task via API', () => {
+    })
+
 })
