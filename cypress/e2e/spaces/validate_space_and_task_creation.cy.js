@@ -34,23 +34,9 @@ describe('Create and Manage Spaces via ClickUp API', () => {
     it('should create a new task in the test space', () => {
         const folderName = `folder-${spaceName}`
         const taskName = `task-${spaceName}`
-        cy.get(`[data-test="project-row__name__${spaceName}"]`, { timeout: 30000 }).click()
-        cy.get(`[data-test="project-row__ellipsis_icon-${spaceName}"]`).click()
-        cy.get('[data-pendo="cu-dropdown-list-item__id-new-folder"]').click()
-        cy.get('[data-test="create-category__form-input"]').type(folderName)
-        cy.get('[data-test="modal__body"]').find('button').contains('Create').click()
-        cy.get('[data-test="views-bar__controller-row"]', { timeout: 30000 })
-            .find('[data-test="create-task-menu__new-task-button"]')
-            .click();
-        cy.get('[data-test="draft-view__title-task"]').click()
-        cy.get('[data-test="draft-view__title-task"]').type(taskName)
-        cy.wait(2000)
-        cy.get('[data-test="draft-view__quick-create-create"]').click()
-        cy.wait(2000)
-
-        cy.getFolder(spaceId, folderName)
-            .then((folderId) => cy.getLists(folderId, folderName))
-            .then((listId) => cy.getTask(listId, taskName))
+        cy.createNewFolderInTheTestSpace(spaceName, folderName)
+        cy.createNewTaskInTheFolder(taskName)
+        cy.verifyTaskWasCreatedSuccessfully(spaceId, folderName, taskName)
     })
 
 

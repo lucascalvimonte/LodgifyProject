@@ -134,3 +134,29 @@ Cypress.Commands.add('getTask', (listId, taskName) => {
         }
     })
 })
+
+// Creates a new folder in the test space via the UI
+Cypress.Commands.add('createNewFolderInTheTestSpace', (spaceName, folderName) => {
+    cy.get(`[data-test="project-row__name__${spaceName}"]`, { timeout: 10000 }).click()
+    cy.get(`[data-test="project-row__ellipsis_icon-${spaceName}"]`).click()
+    cy.get('[data-pendo="cu-dropdown-list-item__id-new-folder"]').click()
+    cy.get('[data-test="create-category__form-input"]').type(folderName)
+    cy.get('[data-test="modal__body"]').find('button').contains('Create').click()
+})
+
+// Creates a new task inside the folder via the UI
+Cypress.Commands.add('createNewTaskInTheFolder', (taskName) => {
+    cy.get('[data-test="views-bar__controller-row"]', { timeout: 30000 })
+        .find('[data-test="create-task-menu__new-task-button"]')
+        .click();
+    cy.get('[data-test="draft-view__title-task"]').click()
+    cy.get('[data-test="draft-view__title-task"]').type(taskName)
+    cy.get('[data-test="draft-view__quick-create-create"]').click()
+})
+
+// Verifies that the task was successfully created via the API
+Cypress.Commands.add('verifyTaskWasCreatedSuccessfully', (spaceId, folderName, taskName) => {
+    cy.getFolder(spaceId, folderName)
+        .then((folderId) => cy.getLists(folderId, folderName))
+        .then((listId) => cy.getTask(listId, taskName))
+})
