@@ -68,3 +68,69 @@ Cypress.Commands.add('deleteSpace', (spaceId) => {
         cy.log(`Space with ID: ${spaceId} deleted successfully`)
     })
 })
+
+// Command to get the folder ID from a space using the folder name
+Cypress.Commands.add('getFolder', (spaceId, nameFolder) => {
+    const apiToken = Cypress.env('apiToken')
+
+    return cy.request({
+        method: 'GET',
+        url: `https://api.clickup.com/api/v2/space/${spaceId}/folder`,
+        headers: {
+            'Authorization': `${apiToken}`
+        }
+    }).then((response) => {
+        expect(response.status).to.eq(200)
+        const folder = response.body.folders.find(f => f.name === nameFolder)
+        if (folder) {
+            cy.log(`Folder found: ${folder.name} with ID: ${folder.id}`)
+            cy.wrap(folder.id).as('folderId')
+        } else {
+            throw new Error(`Folder with name ${nameFolder} not found.`)
+        }
+    })
+})
+
+// Command to get the list ID from a folder using the folder ID and name
+Cypress.Commands.add('getLists', (folderId, nameFolder) => {
+    const apiToken = Cypress.env('apiToken')
+
+    return cy.request({
+        method: 'GET',
+        url: `https://api.clickup.com/api/v2/folder/${folderId}/list`,
+        headers: {
+            'Authorization': `${apiToken}`
+        }
+    }).then((response) => {
+        expect(response.status).to.eq(200)
+        const lists = response.body.lists.find(l => l.folder.name === nameFolder)
+        if (lists) {
+            cy.log(`List found: ${lists.name} with ID: ${lists.id}`)
+            cy.wrap(lists.id).as('listId')
+        } else {
+            throw new Error(`Folder with name ${nameFolder} not found.`)
+        }
+    })
+})
+
+// Command to get the task ID from a list using the task name
+Cypress.Commands.add('getTask', (listId, taskName) => {
+    const apiToken = Cypress.env('apiToken')
+
+    return cy.request({
+        method: 'GET',
+        url: `https://api.clickup.com/api/v2/list/${listId}/task`,
+        headers: {
+            'Authorization': `${apiToken}`,
+        }
+    }).then((response) => {
+        expect(response.status).to.eq(200)
+
+        const task = response.body.tasks.find(t => t.name === taskName)
+        if (task) {
+            cy.log(`Task found: ${task.name} with ID: ${task.id}`)
+        } else {
+            throw new Error(`Task with name "${taskName}" not found.`)
+        }
+    })
+})
