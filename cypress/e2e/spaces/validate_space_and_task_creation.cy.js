@@ -29,7 +29,7 @@ describe('Create and Manage Spaces via ClickUp API', () => {
         }
     })
 
-    it.skip('should verify the new space in the UI', () => {
+    it('should verify the new space in the UI', () => {
         cy.contains(spaceName, { timeout: 30000 }).should('exist')
     })
 
