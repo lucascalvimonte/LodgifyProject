@@ -5,8 +5,11 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },
-    e2e: {
-      baseUrl: 'https://app.clickup.com/',
-    },
+    baseUrl: 'https://app.clickup.com/',
+    defaultCommandTimeout: 10000,
+    numTestsKeptInMemory: 1,
+    experimentalMemoryManagement: true,
+    video: false,
+    screenshotOnRunFailure: false
   },
 });

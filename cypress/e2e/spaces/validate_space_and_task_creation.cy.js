@@ -1,6 +1,8 @@
 describe('Create and Manage Spaces via ClickUp API', () => {
     let spaceName
     let spaceId
+    let taskName
+    let folderName
 
     // Before all tests, create a workspace via the API
     before(() => {
@@ -32,8 +34,8 @@ describe('Create and Manage Spaces via ClickUp API', () => {
     })
 
     it('should create a new task in the test space', () => {
-        const folderName = `folder-${spaceName}`
-        const taskName = `task-${spaceName}`
+        folderName = `folder-${spaceName}`
+        taskName = `task-${spaceName}`
         cy.createNewFolderInTheTestSpace(spaceName, folderName)
         cy.createNewTaskInTheFolder(taskName)
         cy.verifyTaskWasCreatedSuccessfully(spaceId, folderName, taskName)
@@ -41,5 +43,8 @@ describe('Create and Manage Spaces via ClickUp API', () => {
 
 
     it('should create task via API', () => {
+        const newTask = `new-task-${spaceName}`
+        cy.validateTaskCreatedViaUI(spaceName, spaceId, folderName, newTask)
+        cy.validatTaskWasCreatedViaUI(spaceName, folderName, newTask)
     })
 })
