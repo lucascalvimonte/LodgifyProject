@@ -135,6 +135,37 @@ Cypress.Commands.add('getTask', (listId, taskName) => {
     })
 })
 
+Cypress.Commands.add('createTaskViaAPI', (listId, taskName) => {
+    const apiToken = Cypress.env('apiToken');
+
+    return cy.request({
+        method: 'POST',
+        url: `https://api.clickup.com/api/v2/list/${listId}/task`,
+        headers: {
+            'Authorization': `${apiToken}`,
+            'Content-Type': 'application/json'
+        },
+        body: {
+            "name": taskName,
+            "description": "Test task created via API",
+            "assignees": [],
+            "tags": [],
+            "status": "to do",
+            "priority": 3,
+            "due_date": null,
+            "start_date": null,
+            "notify_all": true,
+            "parent": null,
+            "links_to": null,
+            "check_required_custom_fields": true
+        }
+    }).then((response) => {
+        expect(response.status).to.eq(200)
+        cy.log(`Task "${taskName}" created via API with ID: ${response.body.id}`);
+        cy.wrap(response.body).as('createdTask');
+    });
+});
+
 // Creates a new folder in the test space via the UI
 Cypress.Commands.add('createNewFolderInTheTestSpace', (spaceName, folderName) => {
     cy.get(`[data-test="project-row__name__${spaceName}"]`, { timeout: 10000 }).click()
@@ -149,6 +180,7 @@ Cypress.Commands.add('createNewTaskInTheFolder', (taskName) => {
     cy.get('[data-test="views-bar__controller-row"]', { timeout: 30000 })
         .find('[data-test="create-task-menu__new-task-button"]')
         .click();
+    cy.get('[data-test="draft-view__container"]').should('be.visible')
     cy.get('[data-test="draft-view__title-task"]').click()
     cy.get('[data-test="draft-view__title-task"]').type(taskName)
     cy.get('[data-test="draft-view__quick-create-create"]').click()
@@ -159,4 +191,17 @@ Cypress.Commands.add('verifyTaskWasCreatedSuccessfully', (spaceId, folderName, t
     cy.getFolder(spaceId, folderName)
         .then((folderId) => cy.getLists(folderId, folderName))
         .then((listId) => cy.getTask(listId, taskName))
+})
+
+Cypress.Commands.add('validateTaskCreatedViaUI', (spaceName, spaceId, folderName, newTask) => {
+    cy.getFolder(spaceId, folderName)
+        .then((folderId) => cy.getLists(folderId, folderName))
+        .then((listId) => cy.createTaskViaAPI(listId, newTask))
+})
+
+Cypress.Commands.add('validatTaskWasCreatedViaUI', (spaceName, folderName, newTask) => {
+    cy.get(`[data-test="project-row__name__${spaceName}"]`, { timeout: 10000 }).click()
+    cy.get(`[data-test="category-row__folder-name__${folderName}"]`).click()
+    cy.get('[data-test="sidebar-flat-tree__item-name-List"]').click()
+    cy.get(`[data-test="task-row-main__${newTask}"]`).should('be.visible')
 })
