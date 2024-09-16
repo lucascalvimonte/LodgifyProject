@@ -41,7 +41,8 @@ To execute the tests locally, you will need to configure a few environment varia
 {
   "email": "your-email@example.com",
   "password": "your-password",
-  "apiToken": "your-api-token"
+  "apiToken": "your-api-token",
+  "apiUrl": "api-url-from-clickup"
 }
 ```
 
