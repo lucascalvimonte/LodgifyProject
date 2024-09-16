@@ -41,11 +41,10 @@ describe('Create and Manage Spaces via ClickUp API', () => {
         cy.verifyTaskWasCreatedSuccessfully(spaceId, folderName, taskName)
     })
 
-
     it('should create task via API', () => {
         const newTask = `new-task-${spaceName}`
-        cy.validateTaskCreatedViaAPI(spaceName, spaceId, folderName, newTask)
+        cy.validateTaskCreatedViaAPI(spaceId, folderName, newTask)
         cy.loginUser()
-        cy.validateTaskWasCreatedViaUI(spaceName, folderName, newTask)
+        cy.assertTaskVisibleInUI(spaceName, folderName, newTask)
     })
 })

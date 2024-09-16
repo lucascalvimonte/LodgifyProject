@@ -80,14 +80,16 @@ Cypress.Commands.add('getFolder', (spaceId, nameFolder) => {
             'Authorization': `${apiToken}`
         }
     }).then((response) => {
-        expect(response.status).to.eq(200)
-        const folder = response.body.folders.find(f => f.name === nameFolder)
-        if (folder) {
-            cy.log(`Folder found: ${folder.name} with ID: ${folder.id}`)
-            cy.wrap(folder.id).as('folderId')
-        } else {
-            throw new Error(`Folder with name ${nameFolder} not found.`)
+        if (response.status !== 200) {
+            cy.log(`Error retrieving folder. Status code: ${response.status}`)
+            throw new Error(`Error retrieving folder. Status code: ${response.status}`)
         }
+        const folder = response.body.folders.find(f => f.name === nameFolder)
+        if (!folder) {
+            throw new Error(`Folder with the name ${nameFolder} not found in space with ID ${spaceId}.`)
+        }
+        cy.log(`Folder "${folder.name}" found with ID: ${folder.id}`)
+        cy.wrap(folder.id).as('folderId')
     })
 })
 
@@ -102,14 +104,16 @@ Cypress.Commands.add('getLists', (folderId, nameFolder) => {
             'Authorization': `${apiToken}`
         }
     }).then((response) => {
-        expect(response.status).to.eq(200)
-        const lists = response.body.lists.find(l => l.folder.name === nameFolder)
-        if (lists) {
-            cy.log(`List found: ${lists.name} with ID: ${lists.id}`)
-            cy.wrap(lists.id).as('listId')
-        } else {
-            throw new Error(`Folder with name ${nameFolder} not found.`)
+        if (response.status !== 200) {
+            cy.log(`Error retrieving List. Status code: ${response.status}`)
+            throw new Error(`Error retrieving List. Status code: ${response.status}`)
         }
+        const lists = response.body.lists.find(l => l.folder.name === nameFolder)
+        if (!lists) {
+            throw new Error(`Folder with the name ${nameFolder} not found.`)
+        }
+        cy.log(`List found: ${lists.name} with ID: ${lists.id}`)
+        cy.wrap(lists.id).as('listId')
     })
 })
 
@@ -124,14 +128,15 @@ Cypress.Commands.add('getTask', (listId, taskName) => {
             'Authorization': `${apiToken}`,
         }
     }).then((response) => {
-        expect(response.status).to.eq(200)
-
-        const task = response.body.tasks.find(t => t.name === taskName)
-        if (task) {
-            cy.log(`Task found: ${task.name} with ID: ${task.id}`)
-        } else {
-            throw new Error(`Task with name "${taskName}" not found.`)
+        if (response.status !== 200) {
+            cy.log(`Error retrieving task. Status code: ${response.status}`)
+            throw new Error(`Error retrieving task. Status code: ${response.status}`)
         }
+        const task = response.body.tasks.find(t => t.name === taskName)
+        if (!task) {
+            throw new Error(`Task with the name ${taskName} not found.`)
+        }
+        cy.log(`Task found: ${task.name} with ID: ${task.id}`)
     })
 })
 
@@ -160,7 +165,10 @@ Cypress.Commands.add('createTaskViaAPI', (listId, taskName) => {
             "check_required_custom_fields": true
         }
     }).then((response) => {
-        expect(response.status).to.eq(200)
+        if (response.status !== 200) {
+            cy.log(`Error retrieving task. Status code: ${response.status}`)
+            throw new Error(`Error retrieving trask. Status code: ${response.status}`)
+        }
         cy.log(`Task "${taskName}" created via API with ID: ${response.body.id}`);
         cy.wrap(response.body).as('createdTask');
     });
@@ -177,7 +185,7 @@ Cypress.Commands.add('createNewFolderInTheTestSpace', (spaceName, folderName) =>
 
 // Creates a new task inside the folder via the UI
 Cypress.Commands.add('createNewTaskInTheFolder', (taskName) => {
-    cy.get('[data-test="views-bar__controller-row"]', { timeout: 30000 })
+    cy.get('[data-test="views-bar__controller-row"]', { timeout: 15000 })
         .find('[data-test="create-task-menu__new-task-button"]')
         .click();
     cy.get('[data-test="draft-view__container"]').should('be.visible')
@@ -193,15 +201,15 @@ Cypress.Commands.add('verifyTaskWasCreatedSuccessfully', (spaceId, folderName, t
         .then((listId) => cy.getTask(listId, taskName))
 })
 
-Cypress.Commands.add('validateTaskCreatedViaAPI', (spaceName, spaceId, folderName, newTask) => {
+Cypress.Commands.add('validateTaskCreatedViaAPI', (spaceId, folderName, newTask) => {
     cy.getFolder(spaceId, folderName)
         .then((folderId) => cy.getLists(folderId, folderName))
         .then((listId) => cy.createTaskViaAPI(listId, newTask))
 })
 
-Cypress.Commands.add('validateTaskWasCreatedViaUI', (spaceName, folderName, newTask) => {
+Cypress.Commands.add('assertTaskVisibleInUI', (spaceName, folderName, newTask) => {
     cy.get(`[data-test="project-row__name__${spaceName}"]`, { timeout: 10000 }).click()
     cy.get(`[data-test="category-row__folder-name__${folderName}"]`).click()
     cy.get('[data-test="sidebar-flat-tree__item-name-List"]').click()
-    cy.get(`[data-test="task-row-main__${newTask}"]`).should('be.visible')
+    cy.get(`[data-test="task-row-main__${newTask}"]`).should('be.visible').should('have.text', newTask)
 })
