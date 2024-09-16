@@ -17,12 +17,12 @@ Cypress.Commands.add('loginUser', () => {
 })
 
 // Create a new workspace in ClickUp via the API
-Cypress.Commands.add('createSpace', (spaceName) => {
+Cypress.Commands.add('createSpaceViaAPI', (spaceName) => {
     const apiToken = Cypress.env('apiToken')
     // Get the team ID where the space will be created
     cy.request({
         method: 'GET',
-        url: 'https://api.clickup.com/api/v2/team',
+        url: `${Cypress.env('apiUrl')}/team`,
         headers: {
             'Authorization': `${apiToken}`
         }
@@ -35,7 +35,7 @@ Cypress.Commands.add('createSpace', (spaceName) => {
         cy.get('@teamId').then((teamId) => {
             cy.request({
                 method: 'POST',
-                url: `https://api.clickup.com/api/v2/team/${teamId}/space`,
+                url: `${Cypress.env('apiUrl')}/team/${teamId}/space`,
                 headers: {
                     'Authorization': `${apiToken}`,
                     'Content-Type': 'application/json'
@@ -58,7 +58,7 @@ Cypress.Commands.add('deleteSpace', (spaceId) => {
 
     cy.request({
         method: 'DELETE',
-        url: `https://api.clickup.com/api/v2/space/${spaceId}`,
+        url: `${Cypress.env('apiUrl')}/space/${spaceId}`,
         headers: {
             'Authorization': `${apiToken}`,
             'Content-Type': 'application/json'
@@ -75,7 +75,7 @@ Cypress.Commands.add('getFolder', (spaceId, nameFolder) => {
 
     return cy.request({
         method: 'GET',
-        url: `https://api.clickup.com/api/v2/space/${spaceId}/folder`,
+        url: `${Cypress.env('apiUrl')}/space/${spaceId}/folder`,
         headers: {
             'Authorization': `${apiToken}`
         }
@@ -97,7 +97,7 @@ Cypress.Commands.add('getLists', (folderId, nameFolder) => {
 
     return cy.request({
         method: 'GET',
-        url: `https://api.clickup.com/api/v2/folder/${folderId}/list`,
+        url: `${Cypress.env('apiUrl')}/folder/${folderId}/list`,
         headers: {
             'Authorization': `${apiToken}`
         }
@@ -119,7 +119,7 @@ Cypress.Commands.add('getTask', (listId, taskName) => {
 
     return cy.request({
         method: 'GET',
-        url: `https://api.clickup.com/api/v2/list/${listId}/task`,
+        url: `${Cypress.env('apiUrl')}/list/${listId}/task`,
         headers: {
             'Authorization': `${apiToken}`,
         }
@@ -140,7 +140,7 @@ Cypress.Commands.add('createTaskViaAPI', (listId, taskName) => {
 
     return cy.request({
         method: 'POST',
-        url: `https://api.clickup.com/api/v2/list/${listId}/task`,
+        url: `${Cypress.env('apiUrl')}/list/${listId}/task`,
         headers: {
             'Authorization': `${apiToken}`,
             'Content-Type': 'application/json'
@@ -193,13 +193,13 @@ Cypress.Commands.add('verifyTaskWasCreatedSuccessfully', (spaceId, folderName, t
         .then((listId) => cy.getTask(listId, taskName))
 })
 
-Cypress.Commands.add('validateTaskCreatedViaUI', (spaceName, spaceId, folderName, newTask) => {
+Cypress.Commands.add('validateTaskCreatedViaAPI', (spaceName, spaceId, folderName, newTask) => {
     cy.getFolder(spaceId, folderName)
         .then((folderId) => cy.getLists(folderId, folderName))
         .then((listId) => cy.createTaskViaAPI(listId, newTask))
 })
 
-Cypress.Commands.add('validatTaskWasCreatedViaUI', (spaceName, folderName, newTask) => {
+Cypress.Commands.add('validateTaskWasCreatedViaUI', (spaceName, folderName, newTask) => {
     cy.get(`[data-test="project-row__name__${spaceName}"]`, { timeout: 10000 }).click()
     cy.get(`[data-test="category-row__folder-name__${folderName}"]`).click()
     cy.get('[data-test="sidebar-flat-tree__item-name-List"]').click()

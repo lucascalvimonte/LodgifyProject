@@ -9,17 +9,15 @@ describe('Create and Manage Spaces via ClickUp API', () => {
         // Generate a unique space name using the timestamp and create the space
         cy.generateSpaceName().then((generatedSpaceName) => {
             spaceName = generatedSpaceName
-            cy.createSpace(spaceName).then((newSpace) => {
+            cy.createSpaceViaAPI(spaceName).then((newSpace) => {
                 spaceId = newSpace.id
             })
         })
     })
 
     beforeEach(() => {
-        // Generate a unique space name using the timestamp and create the space
         cy.clearLocalStorage()
         cy.clearCookies()
-        cy.loginUser()
     })
 
     // After all tests, clean up by deleting the created space
@@ -30,12 +28,14 @@ describe('Create and Manage Spaces via ClickUp API', () => {
     })
 
     it('should verify the new space in the UI', () => {
+        cy.loginUser()
         cy.contains(spaceName, { timeout: 30000 }).should('exist')
     })
 
     it('should create a new task in the test space', () => {
         folderName = `folder-${spaceName}`
         taskName = `task-${spaceName}`
+        cy.loginUser()
         cy.createNewFolderInTheTestSpace(spaceName, folderName)
         cy.createNewTaskInTheFolder(taskName)
         cy.verifyTaskWasCreatedSuccessfully(spaceId, folderName, taskName)
@@ -44,7 +44,8 @@ describe('Create and Manage Spaces via ClickUp API', () => {
 
     it('should create task via API', () => {
         const newTask = `new-task-${spaceName}`
-        cy.validateTaskCreatedViaUI(spaceName, spaceId, folderName, newTask)
-        cy.validatTaskWasCreatedViaUI(spaceName, folderName, newTask)
+        cy.validateTaskCreatedViaAPI(spaceName, spaceId, folderName, newTask)
+        cy.loginUser()
+        cy.validateTaskWasCreatedViaUI(spaceName, folderName, newTask)
     })
 })
